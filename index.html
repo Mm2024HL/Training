@@ -1,0 +1,338 @@
+// (vollständiger Code mit ✓ Badge bei Trainingstagen und angepasstem CSS)
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trainings-Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --peach: #fcd5ce;
+      --rose: #f8edeb;
+      --apricot: #ffe5d9;
+      --accent: #ffb3ab;
+      --text: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, var(--peach), var(--rose));
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+    }
+
+    .week-selector {
+      margin-bottom: 1rem;
+    }
+
+    .day-pair {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .day {
+      position: relative;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 1rem;
+      width: 100%;
+      max-width: 240px;
+      transition: transform 0.2s ease;
+    }
+
+    .day:hover {
+      transform: scale(1.01);
+    }
+
+    .day h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .checkmark {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.75rem;
+      font-size: 1.4rem;
+      color: var(--accent);
+      display: none;
+    }
+
+    .day.checked .checkmark {
+      display: block;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.25rem 0;
+    }
+
+    input[type="number"] {
+      width: 4rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      padding: 0.25rem;
+    }
+
+    .progress-container {
+      margin-top: 0.5rem;
+      background: var(--apricot);
+      border-radius: 1rem;
+      height: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: var(--accent);
+      height: 100%;
+      width: 0%;
+      border-radius: 1rem;
+      transition: width 0.3s ease;
+    }
+
+    .slogan-input {
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .slogan-input input {
+      width: 30ch;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--accent);
+      padding: 0.5rem;
+      font-size: 1rem;
+      text-align: center;
+      color: var(--text);
+      outline: none;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .slogan-input input:focus {
+      box-shadow: 0 0 6px var(--accent);
+      transform: scale(1.02);
+    }
+
+    .slogan {
+      font-family: 'Playfair Display', serif;
+      margin: 1rem 0;
+      font-size: 1.2rem;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .controls {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0.25rem;
+      border: none;
+      border-radius: 1rem;
+      background-color: var(--accent);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .evaluation-box {
+      background: white;
+      border: 2px solid var(--accent);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      max-width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .evaluation-box h3 {
+      margin-top: 0;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .evaluation-box p {
+      margin: 0.5rem 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>MANU`S WORKOUT</h1>
+  <div class="slogan-input">
+    <input type="text" id="sloganInput" placeholder="Dein motivierender Spruch..." onkeypress="setSlogan(event)">
+  </div>
+  <div class="slogan" id="sloganDisplay"></div>
+  <div class="week-selector">
+    <button onclick="prevWeek()">⬅️ Vorherige KW</button>
+    <span id="weekDisplay">KW 15</span>
+    <button onclick="nextWeek()">Nächste KW ➡️</button>
+  </div>
+  <div id="weekContainer"></div>
+  <div id="reminderBanner" style="display:none; background: var(--accent); color: white; padding: 1rem; margin-top: 1rem; border-radius: 1rem; max-width: 320px; text-align: center; position: relative;">
+    <span style="position: absolute; top: 0.25rem; right: 0.75rem; cursor: pointer; font-weight: bold;" onclick="this.parentElement.style.display='none'">×</span></div>
+  <div class="controls">
+    <button onclick="saveWeek()">Speichern</button>
+    <button onclick="evaluateWeek()">Auswertung</button>
+  </div>
+  <div class="evaluation-box" id="evaluationBox"></div>
+
+  <script>
+    const days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+    let currentWeek = 15;
+
+    function setSlogan(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('sloganDisplay').innerText = e.target.value;
+        localStorage.setItem('slogan_kw_' + currentWeek, e.target.value);
+        e.target.value = '';
+      }
+    }
+
+    function renderWeek() {
+      document.getElementById('weekDisplay').innerText = 'KW ' + currentWeek;
+      const container = document.getElementById('weekContainer');
+      container.innerHTML = '';
+
+      const slogan = localStorage.getItem('slogan_kw_' + currentWeek);
+      if (slogan) document.getElementById('sloganDisplay').innerText = slogan;
+
+      for (let i = 0; i < days.length; i += 2) {
+        const pair = document.createElement('div');
+        pair.className = 'day-pair';
+
+        for (let j = 0; j < 2 && (i + j) < days.length; j++) {
+          const day = days[i + j];
+          const el = document.createElement('div');
+          el.className = 'day';
+          el.innerHTML = `
+            <span class="checkmark">✓</span>
+            <h2>${day}</h2>
+            <label>Defizit <input type="number" min="0" onchange="updateProgress(this)"></label>
+            <label>Kraft <input type="number" min="0" onchange="updateProgress(this)"></label>
+            <label>Ausdauer <input type="number" min="0" onchange="updateProgress(this)"></label>
+            <div class="progress-container">
+              <div class="progress-bar"></div>
+            </div>
+          `;
+          pair.appendChild(el);
+        }
+        container.appendChild(pair);
+      }
+    }
+
+    function updateProgress(input) {
+      const parent = input.closest('.day');
+      const inputs = parent.querySelectorAll('input[type="number"]');
+      let total = 0;
+      inputs.forEach(i => total += parseInt(i.value || 0));
+      const progress = parent.querySelector('.progress-bar');
+      const percent = Math.min((total / 90) * 100, 100);
+      progress.style.width = percent + '%';
+      parent.classList.toggle('checked', total > 0);
+    }
+
+    function prevWeek() {
+      currentWeek--;
+      renderWeek();
+checkForTrainingReminder();
+checkForTrainingReminder();
+      document.getElementById('evaluationBox').style.display = 'none';
+    }
+
+    function nextWeek() {
+      currentWeek++;
+      renderWeek();
+      document.getElementById('evaluationBox').style.display = 'none';
+    }
+
+    function saveWeek() {
+      const data = [];
+      document.querySelectorAll('.day').forEach((el, index) => {
+        const inputs = el.querySelectorAll('input[type="number"]');
+        data.push({
+          day: days[index],
+          defizit: inputs[0].value,
+          kraft: inputs[1].value,
+          ausdauer: inputs[2].value
+        });
+      });
+      localStorage.setItem('weekdata_kw_' + currentWeek, JSON.stringify(data));
+      alert('Woche gespeichert!');
+    }
+
+    function evaluateWeek() {
+      const data = JSON.parse(localStorage.getItem('weekdata_kw_' + currentWeek) || '[]');
+      const box = document.getElementById('evaluationBox');
+      if (data.length === 0) {
+        box.innerHTML = '<h3>Keine Daten</h3><p>Für diese Woche wurden keine Trainingsdaten gespeichert.</p>';
+        box.style.display = 'block';
+        return;
+      }
+      let sum = { defizit: 0, kraft: 0, ausdauer: 0 };
+      data.forEach(d => {
+        sum.defizit += parseInt(d.defizit || 0);
+        sum.kraft += parseInt(d.kraft || 0);
+        sum.ausdauer += parseInt(d.ausdauer || 0);
+      });
+      box.innerHTML = `
+        <h3>Auswertung KW ${currentWeek}</h3>
+        <p>Defizit: <strong>${sum.defizit} min</strong></p>
+        <p>Kraft: <strong>${sum.kraft} min</strong></p>
+        <p>Ausdauer: <strong>${sum.ausdauer} min</strong></p>
+      `;
+      box.style.display = 'block';
+    }
+
+    renderWeek();
+  
+function checkForTrainingReminder() {
+  const data = JSON.parse(localStorage.getItem('weekdata_kw_' + currentWeek) || '[]');
+  let inactiveStreak = 0;
+
+  for (let i = 0; i < data.length; i++) {
+    const d = data[i];
+    const trained = (parseInt(d.defizit || 0) + parseInt(d.kraft || 0) + parseInt(d.ausdauer || 0)) > 0;
+
+    if (!trained) {
+      inactiveStreak++;
+      if (inactiveStreak === 2) {
+        document.getElementById('reminderBanner').innerText = '👋 Du hast 2 Tage in Folge kein Training eingetragen. Vielleicht ein kurzer Spaziergang? 💪';
+        document.getElementById('reminderBanner').style.display = 'block';
+        break;
+      }
+    } else {
+      inactiveStreak = 0;
+    }
+  }
+}
+</script>
+</body>
+</html>
